@@ -106,3 +106,23 @@ VALUES
     '',
     1
 );
+CREATE TABLE administradores (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    usuario VARCHAR(100) NOT NULL UNIQUE,
+    senha VARCHAR(255) NOT NULL,
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+SELECT * FROM usuarios;
+
+UPDATE produtos
+SET imagem = 'img/whey.jpg'
+WHERE id = 1;
+
+SELECT id, nome, imagem
+FROM produtos;
+
+UPDATE produtos
+SET imagem = 'img/creatina.jpg'
+WHERE id = 2;
