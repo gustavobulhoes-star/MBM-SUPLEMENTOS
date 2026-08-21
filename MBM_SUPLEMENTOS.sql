@@ -114,7 +114,7 @@ CREATE TABLE administradores (
     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-SELECT * FROM usuarios;
+SELECT * FROM administradores;
 
 UPDATE produtos
 SET imagem = 'img/whey.jpg'
