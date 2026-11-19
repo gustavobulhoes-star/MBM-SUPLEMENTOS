@@ -1549,7 +1549,7 @@ footer strong {
 
 
                 <a
-                    href="cadastro.php"
+                    href="finalizar.php"
                     class="checkout"
                 >
 
