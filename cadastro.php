@@ -1,198 +1,158 @@
 <?php
 
+declare(strict_types=1);
+
 session_start();
 
 require_once __DIR__ . '/config/database.php';
 
-$erro = '';
+if (!$pdo instanceof PDO) {
+    die('Erro: conexão com o banco de dados não foi criada.');
+}
+
+$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+$pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+
+$erros = [];
+$sucesso = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $nome = trim((string) ($_POST['nome'] ?? ''));
+    $email = filter_var(trim((string) ($_POST['email'] ?? '')), FILTER_VALIDATE_EMAIL);
+    $senha = (string) ($_POST['senha'] ?? '');
+    $confirmarSenha = (string) ($_POST['confirmar_senha'] ?? '');
 
-    $nome = trim($_POST['nome'] ?? '');
-    $email = trim($_POST['email'] ?? '');
-    $senha = $_POST['senha'] ?? '';
-    $confirmar = $_POST['confirmar'] ?? '';
+    /*
+    |--------------------------------------------------------------------------
+    | VALIDAÇÕES
+    |--------------------------------------------------------------------------
+    */
+    if (mb_strlen($nome) < 3) {
+        $erros[] = 'Informe seu nome completo (mínimo 3 caracteres).';
+    }
 
-    if ($nome === '' || $email === '' || $senha === '') {
+    if (!$email) {
+        $erros[] = 'Informe um e-mail válido.';
+    }
 
-        $erro = 'Preencha todos os campos.';
+    if (strlen($senha) < 6) {
+        $erros[] = 'A senha deve ter no mínimo 6 caracteres.';
+    }
 
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    if ($senha !== $confirmarSenha) {
+        $erros[] = 'As senhas não conferem.';
+    }
 
-        $erro = 'Digite um e-mail válido.';
+    /*
+    |--------------------------------------------------------------------------
+    | SALVA NO BANCO
+    |--------------------------------------------------------------------------
+    */
+    if (empty($erros)) {
+        try {
+            // Verifica se o e-mail já existe no banco
+            $stmtCheck = $pdo->prepare("SELECT id FROM usuarios WHERE email = :email");
+            $stmtCheck->execute([':email' => $email]);
 
-    } elseif (strlen($senha) < 6) {
+            if ($stmtCheck->fetch()) {
+                $erros[] = 'Este e-mail já está cadastrado.';
+            } else {
+                // Cria a hash segura da senha
+                $senhaHash = password_hash($senha, PASSWORD_DEFAULT);
 
-        $erro = 'A senha deve ter pelo menos 6 caracteres.';
+                $sql = "
+                    INSERT INTO usuarios (nome, email, senha)
+                    VALUES (:nome, :email, :senha)
+                ";
 
-    } elseif ($senha !== $confirmar) {
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([
+                    ':nome' => $nome,
+                    ':email' => $email,
+                    ':senha' => $senhaHash
+                ]);
 
-        $erro = 'As senhas não são iguais.';
+                $novoUsuarioId = (int) $pdo->lastInsertId();
 
-    } else {
+                // Autentica o usuário na sessão
+                $_SESSION['usuario_id'] = $novoUsuarioId;
+                $_SESSION['usuario_nome'] = $nome;
 
-        $stmt = $pdo->prepare("
-            SELECT id
-            FROM usuarios
-            WHERE email = ?
-            LIMIT 1
-        ");
+                // Se havia um redirecionamento pendente (ex: checkout/finalizar.php)
+                $redirect = $_SESSION['redirect_depois_login'] ?? 'index.php';
+                unset($_SESSION['redirect_depois_login']);
 
-        $stmt->execute([$email]);
-
-        if ($stmt->fetch()) {
-
-            $erro = 'Este e-mail já está cadastrado.';
-
-        } else {
-
-            $senha_hash = password_hash(
-                $senha,
-                PASSWORD_DEFAULT
-            );
-
-            $stmt = $pdo->prepare("
-                INSERT INTO usuarios
-                (nome, email, senha, tipo)
-                VALUES (?, ?, ?, 'cliente')
-            ");
-
-            $stmt->execute([
-                $nome,
-                $email,
-                $senha_hash
-            ]);
-
-            $_SESSION['usuario_id'] = $pdo->lastInsertId();
-            $_SESSION['usuario_nome'] = $nome;
-
-            header('Location: /mbm/index.php');
-            exit;
+                header('Location: ' . $redirect);
+                exit;
+            }
+        } catch (Throwable $erro) {
+            error_log('Erro ao cadastrar usuário: ' . $erro->getMessage());
+            $erros[] = 'Erro ao criar conta. Tente novamente mais tarde.';
         }
     }
 }
-
 ?>
-
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
-
-<meta charset="UTF-8">
-
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
-
-<title>Cadastro - MBM Suplementos</title>
-
-<link
-    rel="stylesheet"
-    href="/mbm/assets/css/style.css"
->
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar conta - MBM Suplementos</title>
 </head>
+<body>
 
-<body class="auth-page">
+<header>
+    <a href="index.php">MBM SUPLEMENTOS</a>
+</header>
 
-<div class="auth-box">
+<main>
+    <h1>Criar conta</h1>
+    <p>Cadastre-se para realizar suas compras.</p>
 
-    <a
-        href="/mbm/index.php"
-        class="logo auth-logo"
-    >
-        MBM <span>SUPLEMENTOS</span>
-    </a>
-
-    <h1>
-        Criar conta
-    </h1>
-
-    <p class="auth-subtitle">
-        Cadastre-se para realizar suas compras.
-    </p>
-
-
-    <?php if ($erro !== ''): ?>
-
-        <div class="alert error">
-            <?= htmlspecialchars($erro) ?>
+    <?php if (!empty($erros)): ?>
+        <div style="color: red; margin-bottom: 15px;">
+            <?php foreach ($erros as $erro): ?>
+                <p><?= htmlspecialchars($erro, ENT_QUOTES, 'UTF-8') ?></p>
+            <?php endforeach; ?>
         </div>
-
     <?php endif; ?>
 
-
-    <form method="POST">
-
+    <form method="post">
         <label>
             Nome completo
+            <input 
+                type="text" 
+                name="nome" 
+                value="<?= htmlspecialchars($_POST['nome'] ?? '', ENT_QUOTES, 'UTF-8') ?>" 
+                required
+            >
         </label>
-
-        <input
-            type="text"
-            name="nome"
-            value="<?= htmlspecialchars($_POST['nome'] ?? '') ?>"
-            required
-        >
-
 
         <label>
             E-mail
+            <input 
+                type="email" 
+                name="email" 
+                value="<?= htmlspecialchars($_POST['email'] ?? '', ENT_QUOTES, 'UTF-8') ?>" 
+                required
+            >
         </label>
-
-        <input
-            type="email"
-            name="email"
-            value="<?= htmlspecialchars($_POST['email'] ?? '') ?>"
-            required
-        >
-
 
         <label>
             Senha
+            <input type="password" name="senha" required>
         </label>
-
-        <input
-            type="password"
-            name="senha"
-            minlength="6"
-            required
-        >
-
 
         <label>
             Confirmar senha
+            <input type="password" name="confirmar_senha" required>
         </label>
 
-        <input
-            type="password"
-            name="confirmar"
-            minlength="6"
-            required
-        >
-
-
-        <button
-            type="submit"
-            class="btn full"
-        >
-            CRIAR CONTA
-        </button>
-
+        <button type="submit">CRIAR CONTA</button>
     </form>
 
-
-    <p class="auth-footer">
-        Já possui uma conta?
-
-        <a href="/mbm/login.php">
-            Fazer login
-        </a>
-    </p>
-
-</div>
+    <p>Já possui uma conta? <a href="login.php">Fazer login</a></p>
+</main>
 
 </body>
 </html>
