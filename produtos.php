@@ -736,7 +736,12 @@ foreach ($_SESSION['carrinho'] as $quantidade) {
 
         }
 
-    </style>
+    
+        .product-click { display:flex; text-decoration:none; color:inherit; cursor:pointer; }
+        .product-name-link { display:block; color:#fff; text-decoration:none; }
+        .product-name-link:hover { color:#ff3038; }
+        .featured-button, .buy-button { text-decoration:none; text-align:center; }
+</style>
 
 </head>
 
@@ -892,15 +897,13 @@ foreach ($_SESSION['carrinho'] as $quantidade) {
 
                     <!-- IMAGEM -->
 
-                    <div class="product-image">
-
+                    <a class="product-image product-click" href="produto.php?id=<?= (int)$produto['id'] ?>" aria-label="Ver detalhes de <?= htmlspecialchars($produto['nome']) ?>">
                         <img
                             src="<?= htmlspecialchars($imagem) ?>"
                             alt="<?= htmlspecialchars($produto['nome']) ?>"
                             loading="lazy"
                         >
-
-                    </div>
+                    </a>
 
 
                     <!-- INFORMAÇÕES -->
@@ -908,13 +911,7 @@ foreach ($_SESSION['carrinho'] as $quantidade) {
                     <div class="product-info">
 
 
-                        <div class="product-name">
-
-                            <?= htmlspecialchars(
-                                $produto['nome']
-                            ) ?>
-
-                        </div>
+                        <a class="product-name product-name-link" href="produto.php?id=<?= (int)$produto['id'] ?>"><?= htmlspecialchars($produto['nome']) ?></a>
 
 
                         <div class="product-description">
@@ -942,34 +939,7 @@ foreach ($_SESSION['carrinho'] as $quantidade) {
 
                         <!-- BOTÃO COMPRAR -->
 
-                        <form method="POST">
-
-
-                            <input
-                                type="hidden"
-                                name="acao"
-                                value="adicionar"
-                            >
-
-
-                            <input
-                                type="hidden"
-                                name="produto_id"
-                                value="<?= (int)$produto['id'] ?>"
-                            >
-
-
-                            <button
-                                type="submit"
-                                class="buy-button"
-                            >
-
-                                🛒 COMPRAR
-
-                            </button>
-
-
-                        </form>
+                        <a class="buy-button" href="produto.php?id=<?= (int)$produto['id'] ?>">VER DETALHES</a>
 
 
                     </div>
