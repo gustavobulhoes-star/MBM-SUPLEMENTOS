@@ -1312,7 +1312,12 @@ if (!empty($whey['imagem'])) {
 
         }
 
-    </style>
+    
+        .product-click { display:flex; text-decoration:none; color:inherit; cursor:pointer; }
+        .product-name-link { display:block; color:#fff; text-decoration:none; }
+        .product-name-link:hover { color:#ff3038; }
+        .featured-button, .buy-button { text-decoration:none; text-align:center; }
+</style>
 
 </head>
 
@@ -1523,14 +1528,9 @@ if (!empty($whey['imagem'])) {
         <article class="featured-product">
 
 
-            <div class="featured-image">
-
-                <img
-                    src="<?= htmlspecialchars($imagemCreatina) ?>"
-                    alt="<?= htmlspecialchars($creatina['nome']) ?>"
-                >
-
-            </div>
+            <a class="featured-image product-click" href="produto.php?id=<?= (int)$creatina['id'] ?>">
+                <img src="<?= htmlspecialchars($imagemCreatina) ?>" alt="<?= htmlspecialchars($creatina['nome']) ?>">
+            </a>
 
 
             <div class="featured-info">
@@ -1579,30 +1579,7 @@ if (!empty($whey['imagem'])) {
                     <?php if ((int)$creatina['id'] > 0): ?>
 
 
-                        <form method="POST">
-
-                            <input
-                                type="hidden"
-                                name="acao"
-                                value="adicionar"
-                            >
-
-                            <input
-                                type="hidden"
-                                name="produto_id"
-                                value="<?= (int)$creatina['id'] ?>"
-                            >
-
-                            <button
-                                type="submit"
-                                class="featured-button"
-                            >
-
-                                🛒 COMPRAR
-
-                            </button>
-
-                        </form>
+                        <a href="produto.php?id=<?= (int)$creatina['id'] ?>" class="featured-button">VER DETALHES</a>
 
 
                     <?php else: ?>
@@ -1634,14 +1611,9 @@ if (!empty($whey['imagem'])) {
         <article class="featured-product">
 
 
-            <div class="featured-image">
-
-                <img
-                    src="<?= htmlspecialchars($imagemWhey) ?>"
-                    alt="<?= htmlspecialchars($whey['nome']) ?>"
-                >
-
-            </div>
+            <a class="featured-image product-click" href="produto.php?id=<?= (int)$whey['id'] ?>">
+                <img src="<?= htmlspecialchars($imagemWhey) ?>" alt="<?= htmlspecialchars($whey['nome']) ?>">
+            </a>
 
 
             <div class="featured-info">
@@ -1690,30 +1662,7 @@ if (!empty($whey['imagem'])) {
                     <?php if ((int)$whey['id'] > 0): ?>
 
 
-                        <form method="POST">
-
-                            <input
-                                type="hidden"
-                                name="acao"
-                                value="adicionar"
-                            >
-
-                            <input
-                                type="hidden"
-                                name="produto_id"
-                                value="<?= (int)$whey['id'] ?>"
-                            >
-
-                            <button
-                                type="submit"
-                                class="featured-button"
-                            >
-
-                                🛒 COMPRAR
-
-                            </button>
-
-                        </form>
+                        <a href="produto.php?id=<?= (int)$whey['id'] ?>" class="featured-button">VER DETALHES</a>
 
 
                     <?php else: ?>
@@ -1838,29 +1787,18 @@ if (!empty($whey['imagem'])) {
             <article class="product-card">
 
 
-                <div class="product-image">
-
-
-                    <img
-                        src="<?= htmlspecialchars($imagem) ?>"
-                        alt="<?= htmlspecialchars($produto['nome']) ?>"
-                        loading="lazy"
-                    >
-
-
-                </div>
+                <a class="product-image product-click" href="produto.php?id=<?= (int)$produto['id'] ?>">
+                    <img src="<?= htmlspecialchars($imagem) ?>" alt="<?= htmlspecialchars($produto['nome']) ?>" loading="lazy">
+                    
+                </a>
 
 
                 <div class="product-info">
 
 
-                    <div class="product-name">
-
-                        <?= htmlspecialchars(
-                            $produto['nome']
-                        ) ?>
-
-                    </div>
+                    <a class="product-name product-name-link" href="produto.php?id=<?= (int)$produto['id'] ?>">
+                        <?= htmlspecialchars($produto['nome']) ?>
+                    </a>
 
 
                     <div class="product-description">
@@ -1886,34 +1824,7 @@ if (!empty($whey['imagem'])) {
                     </div>
 
 
-                    <form method="POST">
-
-
-                        <input
-                            type="hidden"
-                            name="acao"
-                            value="adicionar"
-                        >
-
-
-                        <input
-                            type="hidden"
-                            name="produto_id"
-                            value="<?= (int)$produto['id'] ?>"
-                        >
-
-
-                        <button
-                            type="submit"
-                            class="buy-button"
-                        >
-
-                            🛒 COMPRAR
-
-                        </button>
-
-
-                    </form>
+                    <a class="buy-button" href="produto.php?id=<?= (int)$produto['id'] ?>">VER DETALHES</a>
 
 
                 </div>
@@ -1960,7 +1871,46 @@ if (!empty($whey['imagem'])) {
 
 </footer>
 
+<a href="https://wa.me/5512981927079"
+   class="whatsapp-float"
+   target="_blank"
+   rel="noopener noreferrer"
+   aria-label="Fale conosco pelo WhatsApp">
+
+    <i class="fab fa-whatsapp"></i>
+
+</a>
+
+<style>
+.whatsapp-float {
+    position: fixed;
+    width: 60px;
+    height: 60px;
+    bottom: 25px;
+    left: 25px;
+    background-color: #25D366;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    z-index: 9999;
+    transition: 0.3s;
+}
+
+.whatsapp-float:hover {
+    background-color: #1ebe5d;
+    transform: scale(1.1);
+    color: #fff;
+}
+</style>
+
+<!-- Biblioteca de ícones Font Awesome -->
+<link rel="stylesheet"
+ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 </body>
-
 </html>
